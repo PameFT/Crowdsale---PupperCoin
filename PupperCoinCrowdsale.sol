@@ -1,0 +1,59 @@
+pragma solidity ^0.5.0;
+
+import "./PupperCoin.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5.0/contracts/crowdsale/Crowdsale.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5.0/contracts/crowdsale/emission/MintedCrowdsale.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5.0/contracts/crowdsale/validation/CappedCrowdsale.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5.0/contracts/crowdsale/validation/TimedCrowdsale.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v2.5.0/contracts/crowdsale/distribution/RefundablePostDeliveryCrowdsale.sol";
+
+// @TODO: Inherit the crowdsale contracts
+contract PupperCoinSale is Crowdsale, MintedCrowdsale, CappedCrowdsale, TimedCrowdsale, RefundablePostDeliveryCrowdsale {
+    
+    // @TODO: Fill in the constructor parameters!
+    constructor(uint rate, address payable wallet, PupperCoin token, uint goal, uint open, uint close)
+        // @TODO: Pass the constructor parameters to the crowdsale contracts.
+        Crowdsale(rate, wallet, token)
+        TimedCrowdsale(now, now + 24 weeks)
+        CappedCrowdsale(goal)
+        RefundableCrowdsale(goal)
+        
+        public
+    {
+        // constructor can stay empty
+    }
+}
+
+contract PupperCoinSaleDeployer {
+
+    address public token_sale_address;
+    address public token_address;
+
+    constructor(
+        // @TODO: Fill in the constructor parameters!
+        string memory name,
+        string memory symbol,
+        address payable wallet,
+        uint goal
+    )
+        public
+    {
+        // @TODO: create the PupperCoin and keep its address handy
+        PupperCoin token = new PupperCoin(name,symbol,0);
+        token_address = address(token);
+
+        // @TODO: create the PupperCoinSale and tell it about the token, set the goal, and set the open and close times to now and now + 24 weeks.
+        PupperCoinSale pupper_sale = new PupperCoinSale(1,wallet,token, goal, now, now + 24 weeks);
+        token_sale_address = address(pupper_sale);
+        
+        // make the PupperCoinSale contract a minter, then have the PupperCoinSaleDeployer renounce its minter role
+        token.addMinter(token_sale_address);
+        token.renounceMinter();
+    }
+}
+//PupperCoin, PPCN, 0x20bFc8A104F042b96f7269cD02F11F2c1213DAdE, 300
+//0x0B9d8B5c726A344cc9D6eB667992089535A999e2
+//0x9137a55857cB8726E03e61Eb2803c25683285973
+//0x4e43AA13D5D53741135909BB4b2D494aa6f82BEB
+//0x8b2fcB9B3EA3B47CccFdacC266EA46004eDc54E4
+//0xcDff97f2efAF129eb7C4f2aAE7D5b54172DB1CB3
